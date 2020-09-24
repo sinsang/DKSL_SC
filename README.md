@@ -1,2 +1,2 @@
-# DKSL
-DKSL LIVE PROJECT
+# DKSL_SC
+DKSL LIVE server for socket, console

@@ -1,0 +1,1284 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>문자중계 콘솔</title>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+
+    <!-- 합쳐지고 최소화된 최신 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- 부가적인 테마 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+    <!-- 합쳐지고 최소화된 최신 자바스크립트 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <style>
+
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font: 13px Helvetica, Arial; }
+
+    #board {
+      width: 100%;
+      height: 400px;
+    }
+
+    #awayTeamPlayers{
+      width: 30%;
+      float: left;
+    }
+    #awayTeamPlayers li{
+      height: 30px;
+    }
+
+    #homeTeamPlayers{
+      width: 30%;
+      float: right;
+    }
+    #homeTeamPlayers li{
+      height: 30px;
+    }
+
+    #nowSituation{
+      width: 40%;
+      height: 100%;
+      background-color: green;
+      float: left;
+      padding-left: 80px;
+      padding-right: 80px;
+    }
+
+    .base{
+      width: 100px;
+      height: 40px;
+      border: 2px solid black;
+      background-color: white;
+      position: absolute;
+    }
+
+    #firstBase{
+      margin-top: 150px;
+      margin-left: 330px;
+    }
+
+    #secondBase{
+      margin-top: 50px;
+      margin-left: 150px;
+    }
+
+    #thirdBase{
+      margin-top: 150px;
+    }
+
+    #counter{
+      width: 100%;
+      height: 150px;
+      margin-top: 220px;
+      background-color: gray;
+      border: 1px solid black;
+    }
+
+    .countPlace{
+      width: 100%;
+      height: 30px;
+      margin-top: 5px;
+      margin-left: 5px;
+    }
+
+    .countPlace div{
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      margin-left: 3px;
+      float: left;
+    }
+
+    .countPlace p{
+      margin-right: 3px;
+      float: left;
+    }
+
+    #strikeCount div{
+      background-color: yellow;
+    }
+
+    #ballCount div{
+      background-color: green;
+    }
+
+    #outCount div{
+      background-color: red;
+    }
+
+    #subPlayersDiv {
+      z-index: 2;
+      position: absolute;
+      border: 1px solid black;
+      background-color: white;
+
+      top: 4%;
+      left: 25%;
+
+      width: 50%;
+      height: 40%;
+
+      overflow-y: auto;
+    }
+
+    #subPlayersDivBack{
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    </style>
+  </head>
+
+  <body>
+
+    <div class="container" id="board">
+
+      <div id="awayTeamPlayers">
+        <ul class="list-group">
+        </ul>
+      </div>
+
+      <div id="nowSituation">
+        <div class="dropdown dropdown-toggle base" data-toggle="dropdown" role="button" aria-expanded="false" id="firstBase">
+          1루
+        </div><span class="caret"></span>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#">A리그</a></li>
+          <li><a href="#">B리그</a></li>
+          <li><a href="#">C리그</a></li>
+          <li><a href="#">D리그</a></li>
+        </ul>
+        <div class="base" id="secondBase">
+          2루
+        </div>
+        <div class="base" id="thirdBase">
+          3루
+        </div>
+        <div id="counter">
+          <div class="countPlace" id="ballCount">
+            <p>B</p>
+          </div>
+          <div class="countPlace" id="strikeCount">
+            <p>S</p>
+          </div> 
+          <div class="countPlace" id="outCount">
+            <p>O</p>
+          </div>
+          <div id="nowBatterPitcher">
+          </div>
+        </div>
+      </div>
+
+      <div id="homeTeamPlayers">
+        <ul class="list-group">
+        </ul>
+      </div>
+    </div>
+
+    <div class="container">
+
+    <div class="btn-group-lg" id="pitching" style="margin-bottom: 10px">
+      <div class="btn-group-justified">피칭 결과</div>
+      <button class="btn btn-default" id="Ball">B</button>
+      <button class="btn btn-default" id="Strike">S</button>
+      <button class="btn btn-default" id="Foul">파울</button>
+      <button class="btn btn-default" id="Swing">헛스윙</button>
+      <button class="btn btn-default" id="Hit">타격</button>
+      <button class="btn btn-default" id="HBP">몸에 맞는 공</button>
+      <button class="btn btn-default" id="IBB">고의사구</button>
+    </div>    
+
+    <div class="btn-group-lg" id="hit_result" style="margin-bottom: 10px">
+      <div class="btn-group-justified">타격 결과</div>
+      <button type="button" class="btn btn-default outSitu">땅볼 아웃</button>
+      <button type="button" class="btn btn-default outSitu">땅볼로 출루</button>
+      <button type="button" class="btn btn-default outSitu">플라이 아웃</button>
+      <button type="button" class="btn btn-default outSitu">직선타</button>
+      <button type="button" class="btn btn-default outSitu">희생플라이</button>
+      <button type="button" class="btn btn-default outSitu">희생번트</button>
+      <button type="button" class="btn btn-default outSitu">병살타</button>
+      <button type="button" class="btn btn-default outSitu">직선타병살</button>
+      <button type="button" class="btn btn-default outSitu">삼중살</button>
+      <button type="button" class="btn btn-default hitSitu">안타</button>
+      <button type="button" class="btn btn-default hitSitu" id="inHit">내야안타</button>
+      <button type="button" class="btn btn-default hitSitu">2루타</button>
+      <button type="button" class="btn btn-default hitSitu">3루타</button>
+      <button type="button" class="btn btn-default hitSitu">그라운드 홈런</button>
+      <button type="button" class="btn btn-default HRSitu">홈런</button>
+      <button type="button" class="btn btn-default outSitu">번트땅볼 아웃</button>
+      <button type="button" class="btn btn-default outSitu">번트뜬공 아웃</button>
+      <button type="button" class="btn btn-default hitSitu">번트안타</button>
+      <button type="button" class="btn btn-default outSitu">야수선택</button>
+      <button type="button" class="btn btn-default outSitu">실책으로 출루</button>
+    </div>
+    
+    <div class="btn-group-lg" id="fielder" style="margin-bottom: 10px">
+      <div class="btn-group-justified">수비 포지션</div>
+      <button class="btn btn-default infielder" pos="1">투수</button>
+      <button class="btn btn-default infielder" pos="2">포수</button>
+      <button class="btn btn-default infielder" pos="3">1루수</button>
+      <button class="btn btn-default infielder" pos="4">2루수</button>
+      <button class="btn btn-default infielder" pos="5">3루수</button>
+      <button class="btn btn-default infielder" pos="6">유격수</button>
+      <button class="btn btn-default outfielder" pos="7">좌익수</button>
+      <button class="btn btn-default outfielder onlyHit">좌중간</button>
+      <button class="btn btn-default outfielder" pos="8">중견수</button>
+      <button class="btn btn-default outfielder onlyHit">우중간</button>
+      <button class="btn btn-default outfielder" pos="9">우익수</button>
+    </div>
+
+    <div class="btn-group-lg" id="location" style="margin-bottom: 10px">
+      <div class="btn-group-justified">수비 포지션 상세위치</div>
+      <button class="btn btn-default loc">앞</button>
+      <button class="btn btn-default loc">왼쪽</button>
+      <button class="btn btn-default loc">오른쪽</button>
+      <button class="btn btn-default loc">뒤</button>
+    </div>
+
+    <div class="btn-group-lg" id="runnerAfterHitRunnerSelect" style="margin-bottom: 10px">
+      <div class="btn-group-justified" id="runnerAfterHitRunnerSelectHeader"><h1>타격상황이후 추가진루 주자</h1></div>
+      <button class="btn btn-default loc runner" base="1">1루 주자</button>
+      <button class="btn btn-default loc runner" base="2">2루 주자</button>
+      <button class="btn btn-default loc runner" base="3">3루 주자</button>
+      <button class="btn btn-default" id="nextBatter">없음 다음 타자 IN</button>
+    </div>
+
+    <div class="btn-group-lg" id="runnerAfterHit" style="margin-bottom: 10px">
+      <div class="btn-group-justified" id="runnerAfterHitHeader"><h1>타격상황이후 추가진루 상황</h1></div>
+      <button class="btn btn-default loc" id="error">실책</button>
+      <button class="btn btn-default loc" id="runnerSense">주자의 재치</button>
+    </div>
+
+    <div class="btn-group-lg" id="runner" style="margin-bottom: 10px">
+      <div class="btn-group-justified" id="runnerHeader"><h1></h1></div>
+      <button class="btn btn-default loc" id="tag">태그아웃</button>
+      <button class="btn btn-default loc" id="force">포스아웃</button>
+      <button class="btn btn-default loc" id="notMove">현재위치 그대로</button>
+      <button class="btn btn-default loc" id="2B">2루까지 진루</button>
+      <button class="btn btn-default loc" id="3B">3루까지 진루</button>
+      <button class="btn btn-default loc" id="home">홈인</button>
+    </div>
+
+    <div class="btn-group-lg" id="runnerTagOutLoca" style="margin-bottom: 10px">
+      <div class="btn-group-justified" id="runnerHeader"></div>
+      <button class="btn btn-default loc">포수</button>
+      <button class="btn btn-default loc">1루수</button>
+      <button class="btn btn-default loc">2루수</button>
+      <button class="btn btn-default loc">3루수</button>
+      <button class="btn btn-default loc">유격수</button>
+      <button class="btn btn-default loc">좌익수</button>
+      <button class="btn btn-default loc">중견수</button>
+      <button class="btn btn-default loc">우익수</button>
+    </div>
+
+    <div class="btn-group-lg" id="runnerForceOutLoca" style="margin-bottom: 10px">
+      <div class="btn-group-justified" id="runnerHeader"></div>
+      <button class="btn btn-default loc">1루</button>
+      <button class="btn btn-default loc">2루</button>
+      <button class="btn btn-default loc">3루</button>
+      <button class="btn btn-default loc">홈</button>
+    </div>
+
+    <div id="subPlayersDiv">
+    </div>
+    <div id="subPlayersDivBack">
+    </div>
+
+    <div class="panel panel-default" id="sendScript">
+      <div class="panel-heading">전송 할 내용</div>
+      <div class="panel-body" id="scriptContents">
+      </div>
+      <button class="btn btn-default" type="button" id="clearText">초기화</button>
+      <button class="btn btn-default" type="button" id="sendText">전송</button>
+    </div>
+
+    <ul class="dropdown-menu" role="menu" id="playerOption">
+      <li role="presentation" class="dropdown-header" id="playerOptionHeader"></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="playerChange" href="#">선수 교체</a></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="posChange" href="#">포지션 교체</a></li>
+    </ul>
+
+    <ul class="dropdown-menu" role="menu" id="runnerOption">
+      <li role="presentation" class="dropdown-header" id="runnerOptionHeader"></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolenBase" href="#">도루로 진루</a></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolen" href="#">도루 실패 아웃</a></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolen" href="#">도루 실패 진루(실책)</a></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolen" href="#">견제사</a></li>
+    </ul>
+
+  </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="/script/resultCode.js"></script>
+    <script src="/script/gameInfo.js"></script>
+    <script src="/script/consoleWork.js"></script>
+    <script>
+
+      $(document).on("ready", function (){
+
+        socket.emit("getLiveInfo", gameId);
+
+        socket.on("sendLiveInfo", (live, away, home) => {
+
+          liveInfo = live;
+
+          awaySubPlayers = away;
+          homeSubPlayers = home;
+
+          setCountBoard();
+
+          for (var i in getNowOffenseTeam().batterInfo){
+            for (var j in liveInfo.nowBase){
+              if (liveInfo.nowBase[j].ID == getNowOffenseTeam().batterInfo[i].batters[getNowOffenseTeam().batterInfo[i].now].ID){
+                liveInfo.nowBase[j] = getNowOffenseTeam().batterInfo[i].batters[getNowOffenseTeam().batterInfo[i].now];
+              }
+            }
+          }
+
+          if (liveInfo.waitForNextBatter){
+            $("#runnerAfterHitRunnerSelect").show();
+            setRunnerBtn();
+            setRunnerAfterHitSendtext();
+            $("#pitching").hide();
+          }
+          else{
+            $("#runnerAfterHitRunnerSelect").hide();
+          }
+
+          // 새 이닝
+          newInning = () => {
+
+            nowPitchCount = 1;
+            liveInfo.nowCount.Ball = 0;
+            liveInfo.nowCount.Strike = 0;
+            liveInfo.nowCount.Out = 0;
+
+            if (liveInfo.nowTopBottom == 0){
+              liveInfo.nowTopBottom = 1;
+              teamName = liveInfo.home.name;
+            }
+            else {
+              liveInfo.nowInning++;
+              liveInfo.nowTopBottom = 0;
+              teamName = liveInfo.away.name;
+            }
+
+            appendText(liveInfo.nowInning + TopBottom[liveInfo.nowTopBottom] + " " + teamName, "initInning");
+
+            clearBase();
+            renewBase();
+
+          }
+
+          // 다음타자
+          nextBatter = () => {
+
+            nowPitchCount = 1;
+
+            getNowOffenseTeam().nowBatter++;
+            if (getNowOffenseTeam().nowBatter > 9) getNowOffenseTeam().nowBatter = 1;
+
+            appendText(getNowOffenseTeam().nowBatter + "번 타자 " + getNowBatter().name, "batterInfo");
+
+            liveInfo.nowCount.Ball = 0;
+            liveInfo.nowCount.Strike = 0;
+
+            renewPlayerList();
+            setCountBoard();
+
+          }
+
+          // 볼
+          ball = () => {
+
+            nowPitchCount++;
+            liveInfo.nowCount.Ball++;
+
+            getNowPitcher().NP++;
+            getNowPitcher().B++;
+
+            if (liveInfo.nowCount.Ball >= 4){
+              baseOnBalls();
+            }
+
+          }
+
+          // 스트라이크
+          strike = (isFoul) => {
+
+            nowPitchCount++;
+            liveInfo.nowCount.Strike++;
+
+            if (liveInfo.nowCount.Strike >= 3){
+              if (isFoul){
+                liveInfo.nowCount.Strike--;
+              }
+              else{
+                strikeOut();
+              }
+            }
+
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.S++;
+
+          }
+
+          // 삼진
+          strikeOut = () => {
+
+            liveInfo.nowCount.Out++;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode["삼진"]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.AB++;
+            getNowBatter().stat.SO++;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.AB++;
+            getNowPitcher().stat.SO++;
+
+            if (liveInfo.nowCount.Out >= 3){
+              sendText();
+              newInning();
+              nextBatter();
+              sendText();
+            }
+            else {
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
+
+          }
+
+          // 볼넷
+          baseOnBalls = () => {
+
+            moveRunnerWhenBB(0, true);
+            var RBI = moveRunner();
+
+            liveInfo.nowBase[0] = getNowBatter();
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode["볼넷"]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.BB++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.B++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.BB++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            liveInfo.waitForNextBatter = true;
+            $("#runnerAfterHitRunnerSelect").show();
+            setRunnerBtn();
+            $("#pitching").hide();
+            renewPlayerList();
+
+          }
+
+          // 사구
+          hitByPitch = () => {
+
+            // 주자 이동
+            moveRunnerWhenBB(0, true);
+            console.log(afterSituBase);
+            var RBI = moveRunner();
+
+            liveInfo.nowBase[0] = getNowBatter(); 
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode["사구"]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.HBP++;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.B++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.HBP++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            liveInfo.waitForNextBatter = true;
+            $("#runnerAfterHitRunnerSelect").show();
+            setRunnerBtn();
+            $("#pitching").hide();
+            renewPlayerList();
+
+          }
+
+          // 고의사구
+          internationalBB = () => {
+
+            moveRunnerWhenBB(0, true);
+            var RBI = moveRunner();
+
+            liveInfo.nowBase[0] = getNowBatter();
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode["볼넷"]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.BB++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.BB++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            liveInfo.waitForNextBatter = true;
+            $("#runnerAfterHitRunnerSelect").show();
+            setRunnerBtn();
+            $("#pitching").hide();
+            renewPlayerList();
+
+          }
+
+          // 홈런
+          HR = (pos) => {
+
+            var tmp = ""
+
+            // 주자 득점
+            for (var i = 2; i >= 0; i--){
+              if (!isEmptyObject(liveInfo.nowBase[i])){
+                afterSituBase[i] = toHome;
+                tmp += (i+1) + "루 주자 " + liveInfo.nowBase[i].name + " : 홈인<br/>";
+              }
+            }
+            appendText(tmp);
+
+            var RBI = 1 + moveRunner();
+            console.log(RBI);
+
+            // 타자주자 홈인
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode[pos + " 홈런"]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.AB++;
+            getNowBatter().stat.H++;
+            getNowBatter().stat.HR++;
+            getNowBatter().stat.R++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.S++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.AB++;
+            getNowPitcher().stat.H++;
+            getNowPitcher().stat.HR++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            liveInfo.waitForNextBatter = true;
+            $("#runnerAfterHitRunnerSelect").show();
+            setRunnerBtn();
+            $("#pitching").hide();
+            clearBase();
+            renewPlayerList();
+
+          }
+
+          // 3루타
+          _3B = (pos, res) => {
+
+            var RBI = moveRunner();
+
+            // 베이스 갱신
+            liveInfo.nowBase[2] = getNowBatter();
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode[pos + " " + res]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.AB++;
+            getNowBatter().stat.H++;
+            getNowBatter().stat._3B++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.S++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.AB++;
+            getNowPitcher().stat.H++;
+            getNowPitcher().stat._3B++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            if (liveInfo.nowCount.Out >= 3){
+              sendText();
+              newInning();
+              nextBatter();
+              sendText();
+            }
+            else {
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
+
+          }
+
+          // 2루타
+          _2B = (pos, res) => {
+
+            var RBI = moveRunner();
+
+            // 베이스 갱신
+            liveInfo.nowBase[1] = getNowBatter();
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode[pos + " " + res]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.AB++;
+            getNowBatter().stat.H++;
+            getNowBatter().stat._2B++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.S++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.AB++;
+            getNowPitcher().stat.H++;
+            getNowPitcher().stat._2B++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            if (liveInfo.nowCount.Out >= 3){
+              sendText();
+              newInning();
+              nextBatter();
+              sendText();
+            }
+            else {
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
+
+          }
+
+          // 안타
+          hit = (pos, res) => {
+
+            var RBI = moveRunner();
+
+            // 베이스 갱신
+            liveInfo.nowBase[0] = getNowBatter();
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode[pos + " " + res]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.AB++;
+            getNowBatter().stat.H++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.S++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.AB++;
+            getNowPitcher().stat.H++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            if (liveInfo.nowCount.Out >= 3){
+              sendText();
+              newInning();
+              nextBatter();
+              sendText();
+            }
+            else {
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
+
+          }
+
+          // 타자교체
+          changeBatter = (team, order, subPlayer) => {
+
+            var newPlayer = getBatter(subPlayer.playerId, subPlayer.playerName, getBatterByOrder(team, order).position);
+
+            // 현재타자일 경우
+            if (getNowBatter() == getBatterByOrder(team, order)){
+              appendText((order*1 + 1) + "번 타자 " + getBatterByOrder(team, order).name + " : 대타 " + subPlayer.playerName + "(으)로 교체");
+              $("#sendText").click(function(event) { appendText((order*1 + 1) + "번 타자 " + subPlayer.playerName); });
+            }
+            else {
+              appendText(posName[getBatterByOrder(team, order).position - 1] + " " + getBatterByOrder(team, order).name + " : " + posName[getBatterByOrder(team, order).position - 1] + " " + subPlayer.playerName + "(으)로 교체");
+            }
+
+            $("#sendText").click(function(event) {
+
+              console.log("asdas");
+
+              // 바꾼 타자가 투수일 경우
+              if (getBatterByOrder(team, order).position == "1"){
+
+                liveInfo[team].nowPitcher++;
+
+                liveInfo[team].pitcherInfo[liveInfo[team].nowPitcher] = getPitcher(subPlayer.playerId, subPlayer.playerName);
+              }
+
+              liveInfo[team].batterInfo[order].now++;
+
+              setBatterByOrder(team, order, newPlayer);
+              renewPlayerList();
+
+              sendText();
+
+            });
+
+          }
+
+          // 투수교체
+          changePitcher = (team, nextPitcher) => {
+
+            var newPitcher = getPitcher(nextPitcher.playerId, nextPitcher.playerName);
+
+            appendText("투수 " + getNowTeamPitcher(team).name + " : 투수 " + nextPitcher.playerName + "(으)로 교체");
+
+            $("#sendText").click(function(event) {
+              liveInfo[team].nowPitcher++;
+              liveInfo[team].pitcherInfo[liveInfo[team].nowPitcher] = newPitcher;
+              renewPlayerList();
+              sendText();
+            });
+
+          }
+
+          // 포지션 교체
+          changePosition = (team, player, pos) => {
+
+            if (pos == 9){
+              alert("지명타자로는 포지션 교체를 할 수 없습니다.");
+              return;
+            }
+
+            var nowPlayer = getPlayerByID(team, player.playerId);
+
+            appendText(posName[nowPlayer.position - 1] + " " + nowPlayer.name + " : " + posName[pos] + "(으)로 수비위치 변경");
+            $(".players[player-id=" + player.playerId + "]").append("")
+
+            $("#sendText").click(function(event) {
+  
+              nowPlayer.position = "" + (pos + 1);
+
+              if (nowPlayer.position == "1"){
+                liveInfo[team].nowPitcher++;
+                liveInfo[team].pitcherInfo[liveInfo[team].nowPitcher] = getPitcher(nowPlayer.ID, nowPlayer.name);;
+              }
+
+              renewPlayerList();
+              sendText();
+
+            });
+
+          }
+
+          // 아웃처리
+          Out = (pos, res, pnum) => {
+
+            if (res != "야수선택" && res != "땅볼로 출루" && res != "실책으로 출루")
+              liveInfo.nowCount.Out++;
+
+            var RBI = moveRunner();
+
+            // 병살타 타점 무효
+            if (res == "병살타" || res == "직선타병살") RBI = 0;
+
+            // 팀스탯 누적
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            // 타자스탯 누적
+            getNowBatter().result[liveInfo.nowInning - 1].push(resultCode[pos + " " + res]);
+            getNowBatter().stat.PA++;
+            getNowBatter().stat.AB++;
+            if (res == "병살타" || res == "직선타병살") getNowBatter().stat.GDP++;
+            getNowBatter().stat.RBI += RBI;
+
+            // 투수스탯 누적
+            getNowPitcher().stat.NP++;
+            getNowPitcher().stat.S++;
+            getNowPitcher().stat.PA++;
+            getNowPitcher().stat.AB++;
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            if (res == "야수선택" || res == "땅볼로 출루" || res == "실책으로 출루")
+              liveInfo.nowBase[0] = getNowBatter();
+
+            if (res == "실책으로 출루"){
+              for (i in getNowDefenceTeam().batterInfo){
+                if (getNowDefenceTeam().batterInfo[i].batters[getNowDefenceTeam().batterInfo[i].now].position == posCode[pos]){
+                  getNowDefenceTeam().batterInfo[i].batters[getNowDefenceTeam().batterInfo[i].now].stat.E++;
+                }
+              }
+            }
+
+            if (liveInfo.nowCount.Out >= 3){
+              sendText();
+              newInning();
+              nextBatter();
+              sendText();
+            }
+            else {
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
+
+          }
+
+          // 베이스 상황판 갱신
+          renewBase = () => {
+
+            $("#firstBase").html("");
+            $("#secondBase").html("");
+            $("#thirdBase").html("");
+
+            $("#firstBase").html(liveInfo.nowBase[0].name);
+            $("#secondBase").html(liveInfo.nowBase[1].name);
+            $("#thirdBase").html(liveInfo.nowBase[2].name);
+
+          }
+
+          // 베이스 삭제
+          clearBase = () => {
+            for (var i in liveInfo.nowBase){
+              liveInfo.nowBase[i] = {};
+            }
+          }
+
+          // 시작되지 않았을 시
+          if (liveInfo.nowInning == 0){
+            console.log("START");
+            newInning();
+            nextBatter();
+            sendText();
+          }
+
+          renewPlayerList();
+
+          setNowPlayer();
+          renewBase();
+
+        });
+
+      });
+
+
+      $(window).on("load", function (){
+
+          $("html").click(function(event) {
+            
+            if (event.target.id != "posChange" && event.target.id != "playerChange" && event.target.id != "awayPlayers" && event.target.id != "homePlayers" && event.target.id != "playerOption" && event.target.id != "playerOptionHeader" && event.target.id != "playerOptionItem" && $("#playerOption").css("display") == "block"){
+              $("#playerOption").hide();
+            }
+
+          });
+
+          $("#subPlayersDivBack").click(function(event) {
+            $("#subPlayersDiv").hide();
+            $("#subPlayersDivBack").hide();
+          });
+
+          // 콘솔 토글작동 상황 버튼 숨김처리
+          $("#hit_result").hide();
+          $("#fielder").hide();
+          $("#location").hide();
+          $("#runner").hide();
+          $("#runnerTagOutLoca").hide();
+          $("#runnerForceOutLoca").hide();
+          $("#subPlayersDiv").hide();
+          $("#subPlayersDivBack").hide();
+          $("#runnerAfterHit").hide();
+
+          // 다음타자 버튼
+          $("#nextBatter").click(function(event) {
+            liveInfo.waitForNextBatter = false;
+            nextBatter();
+            sendText();
+            $("#pitching").show();
+            $("#runnerAfterHitRunnerSelect").hide();
+          });
+
+          // 초기화 버튼
+          $("#clearText").click(function(event) {
+
+            clearTextandAction();
+
+          });
+
+          // 타격상황이후 추가진루 상황
+          $("#runnerAfterHitRunnerSelect").children(".runner").each(function(index, el) {
+            
+            $(el).click(function(event) {
+            
+              var base = $(el).attr("base") * 1;
+
+              $("#runnerAfterHitRunnerSelect").hide();
+
+
+              $("#runnerAfterHitHeader").children("h1").html( base + "루 주자 타격상황이후 추가진루 상황");
+              $("#runnerAfterHit").show();
+              $("#runnerAfterHit").children().each(function(index, el) {
+                
+                $(el).click(function(event) {
+                  
+                  var result = $(el).html();
+
+                  switch(result){
+                    case "실책":
+                      $("#runnerAfterHit").hide();
+
+                      $("#fielder").show();
+                      $(".infielder").show();
+                      $(".outfielder").show();
+                      $(".onlyHit").hide();
+
+                      $("#fielder").children().each(function(index, el) {
+
+                        $(el).click(function(event) {
+
+                          runnerSituAfterHit(base, $(el).html() + " ", result + "으로");
+
+                          for (i in getNowDefenceTeam().batterInfo){
+                              if (getNowDefenceTeam().batterInfo[i].batters[getNowDefenceTeam().batterInfo[i].now].position == $(el).attr("pos")){
+                                getNowDefenceTeam().batterInfo[i].batters[getNowDefenceTeam().batterInfo[i].now].stat.E++;
+                              }
+                            }
+
+                        });   
+
+                      });
+                      break;
+
+                    case "주자의 재치":
+                      $("#runnerAfterHit").hide();
+                      runnerSituAfterHit(base, "", result + "로");
+                      break;
+                  }
+
+                  $(el).unbind("click");
+
+                });
+
+              });
+
+            });
+
+          });
+          
+
+          // 볼 버튼 클릭 시
+          $("#Ball").click(function(event){
+            if(inputText("- " + nowPitchCount + "구 : 볼")){
+              if (liveInfo.nowCount.Ball == 3) appendText(getNowBatter().name + " : 볼넷");
+              $("#sendText").click(function(event) {
+                ball();
+                sendText();
+                setCountBoard();
+              });
+            }
+          });
+
+          // 스트라이크 
+          $("#Strike").click(function(event){
+            if(inputText("- " + nowPitchCount + "구 : 스트라이크")){
+              if (liveInfo.nowCount.Strike == 2) appendText(getNowBatter().name + " : 삼진아웃");
+              $("#sendText").click(function(event) {
+                strike(false);
+                sendText();
+                setCountBoard();
+              });
+            }
+          });
+
+          // 파울
+          $("#Foul").click(function(event){
+            if (inputText("- " + nowPitchCount + "구 : 파울")){
+              $("#sendText").click(function(event) {
+                strike(true);
+                sendText();
+                setCountBoard();
+              });
+            }
+          });
+
+          // 헛스윙
+          $("#Swing").click(function(event){
+            if (inputText("- " + nowPitchCount + "구 : 헛스윙")){
+              if (liveInfo.nowCount.Strike == 2) appendText(getNowBatter().name + " : 삼진아웃");
+              $("#sendText").click(function(event) {
+                strike(false);
+                sendText();
+                setCountBoard();
+              });
+            }
+          });
+
+          //타격
+          $("#Hit").click(function(event) {
+            
+            var tmp = "";
+            var pos = "";
+
+            if (inputText("- " + nowPitchCount + "구 : 타격")){
+
+              $("#hit_result").show();
+              
+              tmp += getNowBatter().name + " : ";
+
+              // 홈런
+              $("#hit_result").children(".HRSitu").each(function(index, el) {
+
+                $(el).click(function(event) {
+
+                  var result = $(el).html();
+                  var loca = "뒤";
+
+                  $("#hit_result").hide();
+                  $("#fielder").show();
+                  $(".infielder").hide();
+                  $(".outfielder").show();
+                  $(".onlyHit").show();
+
+                  $("#fielder").children().each(function(index, el) {
+                    
+                    $(el).click(function(event) {
+
+                      pos = $(el).html();
+
+                      if (pos == "좌중간" || pos == "우중간"){
+                        tmp += pos + " ";
+                      }
+                      else {
+                        tmp += pos + " " + loca + " ";
+                      }
+                      tmp += result;
+
+                      appendText(tmp);
+                      $("#fielder").hide();
+
+                      $("#sendText").click(function(event) {
+                          HR(pos);
+                          sendText();
+                          setRunnerAfterHitSendtext();
+                          setCountBoard();
+                          renewBase();
+                      });
+
+                    });
+
+                  });
+
+                });
+
+              });
+
+              // 안타 관련
+              $("#hit_result").children(".hitSitu").each(function(index, el) {
+
+                var result = "";
+
+                $(el).click(function(event) {
+                  
+                  result = $(el).html();
+
+                  $("#hit_result").hide();
+                  $("#fielder").show();
+                  $(".infielder").show();
+                  $(".outfielder").show();
+                  $(".onlyHit").show();
+                  if (result == "내야안타") $(".outfielder").hide();
+
+                  $("#fielder").children().each(function(index, el) {
+
+                    $(el).click(function(event) {
+
+                      pos = $(el).html();
+
+                      tmp += pos + " ";
+
+                      $("#fielder").hide();
+                      
+                      if (pos == "우중간" || pos == "좌중간"){
+                        tmp += result;
+                        appendText(tmp);
+                        setRunnerSitu(2, pos, result);
+                      }
+                      else {
+                        $("#location").show();
+
+                        $("#location").children().each(function(index, el) {
+                          $(el).click(function(event) {
+                            
+                            tmp += $(el).html() + " " + result;
+                            appendText(tmp);
+                            $("#location").hide();
+                            
+                            if (result == "그라운드 홈런") {
+                              $("#sendText").click(function(event) {
+                                  HR(pos);
+                                  sendText();
+                                  setCountBoard();
+                                  renewBase();
+                              });
+                            }
+                            else setRunnerSitu(2, pos, result);
+
+                          });  
+
+                        });
+                      }
+
+                    });
+
+                  });
+
+                });
+
+              });
+
+
+              // 범타 관련
+              $("#hit_result").children(".outSitu").each(function(index, el) {
+
+                var result = "";
+
+                $(el).click(function(event) {
+                  
+                  result = $(el).html();
+
+                  $("#hit_result").hide();
+                  $("#fielder").show();
+                  $(".infielder").show();
+                  $(".outfielder").show();
+                  $(".onlyHit").hide();
+
+                  $("#fielder").children().each(function(index, el) {
+
+                    $(el).click(function(event) {
+
+                      pos = $(el).html();
+
+                      switch(result){
+                        case "땅볼 아웃" : case "땅볼로 출루" : case "병살타" : case "삼중살" :
+                          tmp += pos + " 앞 " + result;
+                          break;
+                        default :
+                        tmp += pos + " " + result;
+                      }
+
+
+                      $("#fielder").hide();
+
+                      appendText(tmp);
+                          
+                      setRunnerSitu(2, pos, result);
+
+                    });
+
+                  });
+
+                });
+
+              });
+
+            }
+            
+          });
+
+          // 몸에 맞는 공
+          $("#HBP").click(function(event){
+            if(inputText("- " + nowPitchCount + "구 : 볼")){
+              appendText(getNowBatter().name + " : 몸에 맞는 공");
+              $("#sendText").click(function(event) {
+                hitByPitch();
+                sendText();
+                setRunnerAfterHitSendtext();
+                setCountBoard();
+              });
+            }
+          });
+
+          // 고의사구
+          $("#IBB").click(function(event){
+            if(inputText(getNowBatter().name + " : 고의사구")){
+              $("#sendText").click(function(event) {
+                internationalBB();
+                sendText();
+                setRunnerAfterHitSendtext();
+                setCountBoard();
+              });
+            }
+          });
+
+      });
+
+    </script>
+
+  </body>
+</html>

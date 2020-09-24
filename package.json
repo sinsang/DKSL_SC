@@ -1,0 +1,26 @@
+{
+  "name": "dksl_sc",
+  "version": "1.0.0",
+  "description": "dksl live server for socket and console",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sinsang/DKSL_SC.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sinsang/DKSL_SC/issues"
+  },
+  "homepage": "https://github.com/sinsang/DKSL_SC#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "forever": "^3.0.2",
+    "http": "0.0.1-security",
+    "socketio": "^1.0.0"
+  }
+}

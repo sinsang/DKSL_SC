@@ -13,11 +13,6 @@ var liveRoom = [];
 
 app.use('/script', express.static(__dirname + "/script"));
 
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
-
 app.get("/makeRoom", (req, res) => {
   res.sendFile(__dirname + "/makeRoom.html");
 });
@@ -27,7 +22,7 @@ app.get("/console/:gameId", (req, res) => {
   if (liveRoom.length - 1 < gameId) {
     res.sendFile(__dirname + "/404.html");
   } else {
-    res.sendFile(__dirname + "/index.html");
+    res.sendFile(__dirname + "/console.html");
   }
 });
 

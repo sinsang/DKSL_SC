@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "forever": "^3.0.2",
     "http": "0.0.1-security",
+    "node-fetch": "^2.6.1",
     "socketio": "^1.0.0"
   }
 }

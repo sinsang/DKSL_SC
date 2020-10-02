@@ -359,7 +359,7 @@
           // 새 이닝
           newInning = () => {
 
-            nowPitchCount = 1;
+            liveInfo.nowPitchCount = 1;
             liveInfo.nowCount.Ball = 0;
             liveInfo.nowCount.Strike = 0;
             liveInfo.nowCount.Out = 0;
@@ -384,7 +384,7 @@
           // 다음타자
           nextBatter = () => {
 
-            nowPitchCount = 1;
+            liveInfo.nowPitchCount = 1;
 
             getNowOffenseTeam().nowBatter++;
             if (getNowOffenseTeam().nowBatter > 9) getNowOffenseTeam().nowBatter = 1;
@@ -402,7 +402,7 @@
           // 볼
           ball = () => {
 
-            nowPitchCount++;
+            liveInfo.nowPitchCount++;
             liveInfo.nowCount.Ball++;
 
             getNowPitcher().NP++;
@@ -417,7 +417,7 @@
           // 스트라이크
           strike = (isFoul) => {
 
-            nowPitchCount++;
+            liveInfo.nowPitchCount++;
             liveInfo.nowCount.Strike++;
 
             if (liveInfo.nowCount.Strike >= 3){
@@ -1034,7 +1034,7 @@
 
           // 볼 버튼 클릭 시
           $("#Ball").click(function(event){
-            if(inputText("- " + nowPitchCount + "구 : 볼")){
+            if(inputText("- " + liveInfo.nowPitchCount + "구 : 볼")){
               if (liveInfo.nowCount.Ball == 3) appendText(getNowBatter().name + " : 볼넷");
               $("#sendText").click(function(event) {
                 ball();
@@ -1046,7 +1046,7 @@
 
           // 스트라이크 
           $("#Strike").click(function(event){
-            if(inputText("- " + nowPitchCount + "구 : 스트라이크")){
+            if(inputText("- " + liveInfo.nowPitchCount + "구 : 스트라이크")){
               if (liveInfo.nowCount.Strike == 2) appendText(getNowBatter().name + " : 삼진아웃");
               $("#sendText").click(function(event) {
                 strike(false);
@@ -1058,7 +1058,7 @@
 
           // 파울
           $("#Foul").click(function(event){
-            if (inputText("- " + nowPitchCount + "구 : 파울")){
+            if (inputText("- " + liveInfo.nowPitchCount + "구 : 파울")){
               $("#sendText").click(function(event) {
                 strike(true);
                 sendText();
@@ -1069,7 +1069,7 @@
 
           // 헛스윙
           $("#Swing").click(function(event){
-            if (inputText("- " + nowPitchCount + "구 : 헛스윙")){
+            if (inputText("- " + liveInfo.nowPitchCount + "구 : 헛스윙")){
               if (liveInfo.nowCount.Strike == 2) appendText(getNowBatter().name + " : 삼진아웃");
               $("#sendText").click(function(event) {
                 strike(false);
@@ -1085,7 +1085,7 @@
             var tmp = "";
             var pos = "";
 
-            if (inputText("- " + nowPitchCount + "구 : 타격")){
+            if (inputText("- " + liveInfo.nowPitchCount + "구 : 타격")){
 
               $("#hit_result").show();
               
@@ -1253,7 +1253,7 @@
 
           // 몸에 맞는 공
           $("#HBP").click(function(event){
-            if(inputText("- " + nowPitchCount + "구 : 볼")){
+            if(inputText("- " + liveInfo.nowPitchCount + "구 : 볼")){
               appendText(getNowBatter().name + " : 몸에 맞는 공");
               $("#sendText").click(function(event) {
                 hitByPitch();

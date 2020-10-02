@@ -150,6 +150,7 @@ const getGameInfo = (castId, league, away, home, ground) => {
 		},
 		textCast : ["", "", "", "", "", "", "", "", ""], 
 		ground : ground,
+		nowPitchCount : 1,
 		waitForNextBatter : false
 	};
 

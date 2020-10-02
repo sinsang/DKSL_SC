@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const fetch = require("node-fetch");
+const cors = require("cors");
 
 const port = 3002;
 
@@ -12,6 +13,7 @@ const io = require("socket.io")(http, options);
 var liveRoom = [];
 //---------------------
 
+app.use(cors());
 app.use('/script', express.static(__dirname + "/script"));
 
 app.get("/makeRoom", (req, res) => {

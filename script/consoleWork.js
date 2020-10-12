@@ -44,10 +44,12 @@ const setCountBoard = function () {
 }
 
 const clearText = function () {
+
     textForSend = "";
-    afterSituBase = [0, 0, 0];
+
     $("#scriptContents").html("");
     $("#sendText").unbind("click");
+
     $("#hit_result").children().each(function (index, el) {
         $(el).unbind('click');
     });
@@ -81,7 +83,7 @@ const inputText = function (text, className="") {
 
 const appendText = function (text, className="") {
     textForSend += "<div class=\"textCast " + className + "\">" + text + "</div>";
-    $("#scriptContents").append(text);
+    $("#scriptContents").append(text + "<br/>");
 }
 
 const sendText = function () {
@@ -102,6 +104,8 @@ const clearTextandAction = function () {
         $("#runner").hide();
         $("#runnerForceOutLoca").hide();
         $("#runnerTagOutLoca").hide();
+        renewBase();
+        afterSituBase = [0, 0, 0];
     }
 }
 
@@ -292,7 +296,6 @@ const setRunnerSitu = function (base, p, r) {
         $(el).unbind('click');
     });
     if (base < 0) {
-        console.log(r);
         $("#sendText").click(function (event) {
             switch (r) {
                 case "안타":
@@ -413,7 +416,7 @@ const moveRunnerWhenBB = function (base, move) {
                 break;
         }
         move = true;
-    } else {
+    } else if (afterSituBase[base] == 0){
         afterSituBase[base] = notMove;
         move = false;
     } moveRunnerWhenBB(base + 1, move);
@@ -429,10 +432,41 @@ const moveRunnerWhenBB = function (base, move) {
     return;
 }
 
+const moveRunnerWhenBK = function () {
+
+    for (i in liveInfo.nowBase){
+
+        if (!isEmptyObject(liveInfo.nowBase[i])){
+            switch(i*1){
+                case 0:
+                    afterSituBase[i] = to2B;
+                    break;
+                case 1:
+                    afterSituBase[i] = to3B;
+                    break;
+                case 2:
+                    afterSituBase[i] = toHome;
+                    break;
+            }
+
+            var toBase = (i*1 + 2) + "루까지 진루";
+
+            if (i*1 > 1) 
+                toBase = "홈인";
+            appendText((i*1 + 1) + "루주자 " + liveInfo.nowBase[i].name + " : 보크로 " + toBase);
+        }
+
+    }
+
+    return;
+}
+
 const moveRunner = function () {
     
     var tmpBase = [{}, {}, {}];
     var RBI = 0;
+
+    console.log(afterSituBase);
 
     for (var i = 2; i >= 0; i--) {
         if (! isEmptyObject(liveInfo.nowBase[i])) {
@@ -442,19 +476,20 @@ const moveRunner = function () {
                     break;
                 case notMove: tmpBase[i] = liveInfo.nowBase[i];
                     break;
+                case SB2B: liveInfo.nowBase[i].stat.SB++;
                 case to2B: tmpBase[1] = liveInfo.nowBase[i];
                     break;
+                case SB3B: liveInfo.nowBase[i].stat.SB++;
                 case to3B: tmpBase[2] = liveInfo.nowBase[i];
                     break;
+                case SBHome: liveInfo.nowBase[i].stat.SB++;
                 case toHome:
-                    liveInfo.nowBase[i].stat.R ++;
+                    liveInfo.nowBase[i].stat.R++;
                     RBI++;
                     break;
             }
         }
     }
-
-    console.log(RBI);
 
     afterSituBase = [0, 0, 0];
     

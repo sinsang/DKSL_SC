@@ -136,6 +136,10 @@
       height: 100%;
     }
 
+    #runnerOption {
+      z-index: 2;
+    }
+
     </style>
   </head>
 
@@ -149,15 +153,12 @@
       </div>
 
       <div id="nowSituation">
-        <div class="dropdown dropdown-toggle base" data-toggle="dropdown" role="button" aria-expanded="false" id="firstBase">
+        <button id="gameSetAndSave">
+          경기 종료 및 저장
+        </button>
+        <div class="base" id="firstBase">
           1루
-        </div><span class="caret"></span>
-        <ul class="dropdown-menu" role="menu">
-          <li><a href="#">A리그</a></li>
-          <li><a href="#">B리그</a></li>
-          <li><a href="#">C리그</a></li>
-          <li><a href="#">D리그</a></li>
-        </ul>
+        </div>
         <div class="base" id="secondBase">
           2루
         </div>
@@ -179,6 +180,7 @@
         </div>
       </div>
 
+
       <div id="homeTeamPlayers">
         <ul class="list-group">
         </ul>
@@ -196,6 +198,7 @@
       <button class="btn btn-default" id="Hit">타격</button>
       <button class="btn btn-default" id="HBP">몸에 맞는 공</button>
       <button class="btn btn-default" id="IBB">고의사구</button>
+      <button class="btn btn-default" id="BK">보크</button>
     </div>    
 
     <div class="btn-group-lg" id="hit_result" style="margin-bottom: 10px">
@@ -308,12 +311,14 @@
       <li role="presentation" class="playerOptionItem"><a role="menuitem" id="posChange" href="#">포지션 교체</a></li>
     </ul>
 
-    <ul class="dropdown-menu" role="menu" id="runnerOption">
+    <ul class="dropdown-menu" ole="menu" id="runnerOption">
       <li role="presentation" class="dropdown-header" id="runnerOptionHeader"></li>
       <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolenBase" href="#">도루로 진루</a></li>
-      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolen" href="#">도루 실패 아웃</a></li>
-      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolen" href="#">도루 실패 진루(실책)</a></li>
-      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolen" href="#">견제사</a></li>
+      <li role="presentation" class="playerOptionItem"><a role="menuitem" id="stolenFailed" href="#">도루 실패 아웃</a></li>
+      <li role="presentation" class="plrayerOptionItem"><a role="menuitem" id="wildPitch" href="#">폭투로 진루</a></li>
+      <li role="presentation" class="plrayerOptionItem"><a role="menuitem" id="catcherError" href="#">포일로 진루</a></li>
+      <li role="presentation" class="plrayerOptionItem"><a role="menuitem" id="fielderError" href="#">실책으로 진루</a></li>
+      <li role="presentation" class="plrayerOptionItem"><a role="menuitem" id="pickoff" href="#">견제사</a></li>
     </ul>
 
   </div>
@@ -446,6 +451,7 @@
             getNowBatter().stat.SO++;
 
             // 투수스탯 누적
+            getNowPitcher().stat.IP++;
             getNowPitcher().stat.PA++;
             getNowPitcher().stat.AB++;
             getNowPitcher().stat.SO++;
@@ -462,6 +468,7 @@
               setRunnerBtn();
               $("#pitching").hide();
               renewPlayerList();
+              renewBase();
             }
 
           }
@@ -576,7 +583,7 @@
             for (var i = 2; i >= 0; i--){
               if (!isEmptyObject(liveInfo.nowBase[i])){
                 afterSituBase[i] = toHome;
-                tmp += (i+1) + "루 주자 " + liveInfo.nowBase[i].name + " : 홈인<br/>";
+                tmp += (i+1) + "루 주자 " + liveInfo.nowBase[i].name + " : 홈인";
               }
             }
             appendText(tmp);
@@ -752,6 +759,99 @@
 
           }
 
+          // 도루
+          SB = (base) => {
+
+            for (i in liveInfo.nowBase){
+              if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
+                afterSituBase[i] = notMove;
+              }
+            }
+
+            switch (base){
+              case 0:
+                afterSituBase[base] = SB2B;
+                break;
+              case 1:
+                afterSituBase[base] = SB3B;
+                break;
+              case 2:
+                afterSituBase[base] = SBHome;
+                break;
+            }
+
+            var toBase = (base + 2) + "루까지 진루";
+
+            if (base > 1) 
+                toBase = "홈인";
+            appendText((base + 1) + "루주자 " + liveInfo.nowBase[base].name + " : 도루로 " + toBase);
+
+          }
+
+          // 폭투, 포일
+          getBaseByError = (base, result, pos = -1) => {
+
+            for (i in liveInfo.nowBase){
+              if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
+                afterSituBase[i] = notMove;
+              }
+            }
+
+            switch (base){
+              case 0:
+                afterSituBase[base] = to2B;
+                break;
+              case 1:
+                afterSituBase[base] = to3B;
+                break;
+              case 2:
+                afterSituBase[base] = toHome;
+                break;
+            }
+
+            var toBase = (base + 2) + "루까지 진루";
+            var Epos = "";
+            
+            if (pos > -1)
+              Epos = posName[pos];
+            
+
+            if (base > 1) 
+                toBase = "홈인";
+            appendText((base + 1) + "루주자 " + liveInfo.nowBase[base].name + " : " + Epos + result + "로 " + toBase);
+
+          }
+
+          // 도루 실패
+          CS = (base) => {
+
+            for (i in liveInfo.nowBase){
+              if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
+                afterSituBase[i] = notMove;
+              }
+            }
+
+            afterSituBase[base] = tagOut;
+
+            appendText((base + 1) + "루주자 " + liveInfo.nowBase[base].name + " : 도루실패아웃");
+
+          }
+
+          // 견제사
+          pickoff = (base) => {
+
+            for (i in liveInfo.nowBase){
+              if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
+                afterSituBase[i] = notMove;
+              }
+            }
+
+            afterSituBase[base] = tagOut;
+
+            appendText((base + 1) + "루주자 " + liveInfo.nowBase[base].name + " : " + (base + 1) + "루 견제사");
+
+          }
+
           // 타자교체
           changeBatter = (team, order, subPlayer) => {
 
@@ -767,8 +867,6 @@
             }
 
             $("#sendText").click(function(event) {
-
-              console.log("asdas");
 
               // 바꾼 타자가 투수일 경우
               if (getBatterByOrder(team, order).position == "1"){
@@ -834,7 +932,7 @@
 
           }
 
-          // 아웃처리
+          // 타구아웃처리
           Out = (pos, res, pnum) => {
 
             if (res != "야수선택" && res != "땅볼로 출루" && res != "실책으로 출루")
@@ -858,6 +956,7 @@
 
             // 투수스탯 누적
             getNowPitcher().stat.NP++;
+            getNowPitcher().stat.IP++;
             getNowPitcher().stat.S++;
             getNowPitcher().stat.PA++;
             getNowPitcher().stat.AB++;
@@ -891,6 +990,28 @@
 
           }
 
+          runnerAction = function(event) {
+            var RBI = moveRunner();
+            sendText();
+
+            getNowOffenseTeam().score[liveInfo.nowInning - 1] += RBI;
+            getNowOffenseTeam().totalScore += RBI;
+
+            getNowPitcher().stat.R += RBI;
+            getNowPitcher().stat.ER += RBI;
+
+            setCountBoard();
+            renewBase();
+            renewPlayerList();
+
+            if (liveInfo.nowCount.Out >= 3){
+              sendText();
+              newInning();
+              nextBatter();
+              sendText();
+            }
+          };
+
           // 베이스 상황판 갱신
           renewBase = () => {
 
@@ -901,6 +1022,91 @@
             $("#firstBase").html(liveInfo.nowBase[0].name);
             $("#secondBase").html(liveInfo.nowBase[1].name);
             $("#thirdBase").html(liveInfo.nowBase[2].name);
+
+            $(".base").unbind("click");
+            $("#stolenBase").unbind("click");
+            $("#stolenFailed").unbind("click");
+            $("#wildPitch").unbind("click");
+            $("#catcherError").unbind("click");
+            $("#error").unbind("click");
+            $("#pickoff").unbind("click");
+
+            for (i in liveInfo.nowBase){
+
+              if (!isEmptyObject(liveInfo.nowBase[i])){
+
+                $(".base:eq(" + i + ")").click(function(event) {
+
+                  var mousePos = getMousePos(event);
+                  var index = $(this).index();
+
+                  $("#runnerOption").show();
+                  $("#subPlayersDivBack").show();
+                  $("#runnerOption").css({
+                    left : mousePos.x,
+                    top : mousePos.y
+                  });
+                  $("#runnerOptionHeader").html((index + 1) + "루 주자 " + liveInfo.nowBase[index].name);
+
+                  // 도루
+                  $("#stolenBase").click(function(event) {
+                    $("#stolenBase").unbind("click");
+                    $("#sendText").unbind("click", runnerAction);
+                    SB(index);
+                    $("#sendText").bind("click", runnerAction);
+                    $("#runnerOption").hide();
+                  });
+
+                  // 도루 실패
+                  $("#stolenFailed").click(function(event) {
+                    $("#stolenFailed").unbind("click");
+                    $("#sendText").unbind("click", runnerAction);
+                    CS(index);
+                    $("#sendText").bind("click", runnerAction);
+                    $("#runnerOption").hide();
+                  });
+
+                  // 폭투
+                  $("#wildPitch").click(function(event) {
+                    $("#wildPitch").unbind("click");
+                    $("#sendText").unbind("click", runnerAction);
+                    getBaseByError(index, "폭투");
+                    $("#sendText").bind("click", runnerAction);
+                    $("#runnerOption").hide();
+                  });
+
+                  // 포일
+                  $("#catcherError").click(function(event) {
+                    $("#catcherError").unbind("click");
+                    $("#sendText").unbind("click", runnerAction);
+                    getBaseByError(index, "포일");
+                    $("#sendText").bind("click", runnerAction);
+                    $("#runnerOption").hide();
+                  });
+
+                  // 실책
+                  $("#fielderError").click(function(event) {
+                    $("#fielderError").unbind("click");
+                    $("#sendText").unbind("click", runnerAction);
+                    getBaseByError(index, "실책");
+                    $("#sendText").bind("click", runnerAction);
+                    $("#runnerOption").hide();
+                  });
+
+                  // 견제사
+                  $("#pickoff").click(function(event) {
+                    $("#pickoff").unbind("click");
+                    $("#sendText").unbind("click", runnerAction);
+                    pickoff(index);
+                    $("#sendText").bind("click", runnerAction);
+                    $("#runnerOption").hide();
+                  });
+
+                });
+
+              }
+
+            }
 
           }
 
@@ -941,6 +1147,7 @@
 
           $("#subPlayersDivBack").click(function(event) {
             $("#subPlayersDiv").hide();
+            $("#runnerOption").hide();
             $("#subPlayersDivBack").hide();
           });
 
@@ -1232,7 +1439,6 @@
                         tmp += pos + " " + result;
                       }
 
-
                       $("#fielder").hide();
 
                       appendText(tmp);
@@ -1271,6 +1477,17 @@
                 internationalBB();
                 sendText();
                 setRunnerAfterHitSendtext();
+                setCountBoard();
+              });
+            }
+          });
+
+          $("#BK").click(function(event) {
+            if(inputText("")){
+              moveRunnerWhenBK();
+              $("#sendText").click(function BK_func(event){
+                moveRunner();
+                sendText();
                 setCountBoard();
               });
             }

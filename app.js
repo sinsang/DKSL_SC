@@ -105,22 +105,20 @@ io.on("connect", (socket) => {
   			else{
   				away = d;
   			}
-  		});
+  		}).then(
+        fetch("http://49.50.172.42:3001/getTeamPlayers/" + liveRoom[gameId].home.ID).then((r) => {
+          r.json().then((d) => {
+            if (d.error){
+              console.log(d.error);
+            }
+            else{
+              home = d;
+              socket.emit("sendLiveInfo", liveRoom[gameId], away, home);
+            }
+          })
+        })
+      )
   	})
-  	.then(
-  		fetch("http://49.50.172.42:3001/getTeamPlayers/" + liveRoom[gameId].home.ID).then((r) => {
-  			r.json().then((d) => {
-	  			if (d.error){
-	  				console.log(d.error);
-	  			}
-	  			else{
-	  				home = d;
-
-	  				socket.emit("sendLiveInfo", liveRoom[gameId], away, home);
-	  			}
-	  		});
-  		})
-  	);
 
   });
 

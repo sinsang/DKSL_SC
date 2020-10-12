@@ -135,7 +135,12 @@ const getPitcher = (ID, name) => {
 
 const getGameInfo = (castId, league, away, home, ground) => {
 
+	var today = new Date();
+
 	var gameInfo = {
+		year : today.getFullYear(),
+		month : today.getMonth(),
+		date : today.getDate(),
 		castId : castId,
 		league : league,
 		away : away,
@@ -177,9 +182,12 @@ const ofTeam = ['away', 'home'];
 const dfTeam = ['home', 'away'];
 
 // 주자관련 코드
-const tagOut = 0;
-const forceOut = 1;
-const notMove = 2
-const to2B = 3;
-const to3B = 4;
-const toHome = 5;
+const tagOut = 1;
+const forceOut = 2;
+const notMove = 3;
+const to2B = 4;
+const to3B = 5;
+const toHome = 6;
+const SB2B = 7;
+const SB3B = 8;
+const SBHome = 9;

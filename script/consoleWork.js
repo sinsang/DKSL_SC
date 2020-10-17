@@ -82,12 +82,29 @@ const inputText = function (text, className="") {
 }
 
 const appendText = function (text, className="") {
+    //tmp = "<div class=\"textCast " + className + "\">" + text + "</div>";
+    //textForSend = tmp + textForSend;
     textForSend += "<div class=\"textCast " + className + "\">" + text + "</div>";
     $("#scriptContents").append(text + "<br/>");
 }
 
 const sendText = function () {
+    // 콘솔 토글작동 상황 버튼 숨김처리
+    $("#hit_result").hide();
+    $("#fielder").hide();
+    $("#location").hide();
+    $("#runner").hide();
+    $("#runnerForceOutLoca").hide();
+    $("#runnerTagOutLoca").hide();
+
     liveInfo.textCast[liveInfo.nowInning - 1] += textForSend;
+
+    if (liveInfo.nowCount.Out >= 3){
+        console.log("이닝교대");
+        newInning();
+        nextBatter();
+    }
+
     socket.emit("renewLive", gameId, liveInfo);
     clearText();
     setNowPlayer();
@@ -128,7 +145,7 @@ const getNowPitcher = function () {
     return liveInfo[dfTeam[liveInfo.nowTopBottom]].pitcherInfo[liveInfo[dfTeam[liveInfo.nowTopBottom]].nowPitcher];
 }
 const getNowTeamPitcher = function (team) {
-    return liveInfo[team.pitcherInfo[liveInfo[team].nowPitcher]];
+    return liveInfo[team].pitcherInfo[liveInfo[team].nowPitcher];
 }
 const getAwayTeam = function () {
     return liveInfo["away"];
@@ -285,6 +302,7 @@ const runnerSituAfterHit = function (base, p, r) {
 }
 
 const setRunnerSitu = function (base, p, r) {
+
     $("#runner").hide();
     $("#runner").children().each(function (index, el) {
         $(el).unbind('click');
@@ -330,10 +348,13 @@ const setRunnerSitu = function (base, p, r) {
                     Out(p, r);
                     break;
             }
+
             sendText();
-            setRunnerAfterHitSendtext();
-            setCountBoard();
-            renewBase();
+            if (liveInfo.nowCount < 3) {
+                setRunnerAfterHitSendtext();
+                setCountBoard();
+                renewBase();
+            }
         });
         return;
     }
@@ -472,7 +493,9 @@ const moveRunner = function () {
         if (! isEmptyObject(liveInfo.nowBase[i])) {
             switch (afterSituBase[i]) {
                 case tagOut:
-                case forceOut: liveInfo.nowCount.Out++;
+                case forceOut: 
+                    liveInfo.nowCount.Out++;
+                    getNowPitcher().stat.IP++;
                     break;
                 case notMove: tmpBase[i] = liveInfo.nowBase[i];
                     break;
@@ -515,7 +538,10 @@ const renewPlayerList = function () {
         $("#homeTeamPlayers").children("ul").append("<div class=\"list-group-item players\" id=\"homePlayers\" order=\"" + (i) + "\" pos=\"" + liveInfo.away.batterInfo[i].batters[liveInfo.away.batterInfo[i].now].position + "\" player-name=\"" + liveInfo.home.batterInfo[i].batters[liveInfo.home.batterInfo[i].now].name + "\" player-id=\"" + liveInfo.home.batterInfo[i].batters[liveInfo.home.batterInfo[i].now].ID + "\">" + liveInfo.home.batterInfo[i].batters[liveInfo.home.batterInfo[i].now].name + " - " + getKeyByValue(posCode, liveInfo.home.batterInfo[i].batters[liveInfo.home.batterInfo[i].now].position) + "</div>");
     // 투수
     $("#awayTeamPlayers").children("ul").append("<div class=\"list-group-item players\" id=\"awayPlayers\" player-name=\"" + liveInfo.away.pitcherInfo[liveInfo.away.nowPitcher].name + "\" player-id=\"" + liveInfo.away.pitcherInfo[liveInfo.away.nowPitcher].ID + "\" pos=\"pitcher\">" + liveInfo.away.pitcherInfo[liveInfo.away.nowPitcher].name + "</div>");
-    $("#homeTeamPlayers").children("ul").append("<div class=\"list-group-item players\" id=\"homePlayers\" player-name=\"" + liveInfo.away.pitcherInfo[liveInfo.away.nowPitcher].name + "\" player-id=\"" + liveInfo.home.pitcherInfo[liveInfo.home.nowPitcher].ID + "\" pos=\"pitcher\">" + liveInfo.home.pitcherInfo[liveInfo.home.nowPitcher].name + "</div>");
+    $("#homeTeamPlayers").children("ul").append("<div class=\"list-group-item players\" id=\"homePlayers\" player-name=\"" + liveInfo.home.pitcherInfo[liveInfo.home.nowPitcher].name + "\" player-id=\"" + liveInfo.home.pitcherInfo[liveInfo.home.nowPitcher].ID + "\" pos=\"pitcher\">" + liveInfo.home.pitcherInfo[liveInfo.home.nowPitcher].name + "</div>");
+
+    // 현재투수 표시
+    $(".players[player-id=" + getNowPitcher().ID + "][pos=pitcher]").append("  <strong>현재투수</strong>");
 
     // 현재타자 표시
     $(".players[player-id=" + getNowBatter().ID + "][pos!=pitcher]").append("  <strong>현재타자</strong>");
@@ -593,6 +619,15 @@ const renewPlayerList = function () {
             $("#playerChange").html("대타 교체");
         }
 
+        if (getNowTeamPitcher("home").ID == $(this).attr("player-id")*1 && $(this).attr("pos") == "pitcher"){
+            $("#playerOptionHeader").append("  <strong>투수</strong>");
+            $("#playerChange").html("투수 교체");
+        }
+        if (getNowTeamPitcher("away").ID == $(this).attr("player-id")*1 && $(this).attr("pos") == "pitcher"){
+            $("#playerOptionHeader").append("  <strong>투수</strong>");
+            $("#playerChange").html("투수 교체");
+        }
+
         for (i in liveInfo.nowBase){
             if ($(this).attr("player-id") == liveInfo.nowBase[i].ID && $(this).attr("pos") != "pitcher"){
                 $("#playerOptionHeader").append("  <strong>" + (i*1 + 1) + "루 주자</strong>");
@@ -626,8 +661,28 @@ const renewPlayerList = function () {
             $(".subPlayers").click(function(index, el) {
                 
                 if (playerPos == "pitcher"){
+
                     if (confirm(playerName + "을(를) " + $(this).html() + "(으)로 교체하시겠습니까?")){
-                        changePitcher(team, order, {playerId:$(this).attr("player-id"), playerName:$(this).html()});
+
+                        changePitcher(team, {playerId:$(this).attr("player-id"), playerName:$(this).html()});
+
+                        for (i in getAwayTeam().batterInfo){
+                            console.log(getAwayTeam().batterInfo[i].batters[getAwayTeam().batterInfo[i].now].ID, getNowTeamPitcher("away").ID);
+                            if (getAwayTeam().batterInfo[i].batters[getAwayTeam().batterInfo[i].now].ID == getNowTeamPitcher("away").ID){
+                                var newPlayer = getBatter($(this).attr("player-id"), $(this).html(), getBatterByOrder(team, i*1).position);
+                                setBatterByOrder(team, i*1, newPlayer);
+                                break;
+                            }
+                        }
+
+                        for (i in getHomeTeam().batterInfo){
+                            if (getHomeTeam().batterInfo[i].batters[getHomeTeam().batterInfo[i].now].ID == getNowTeamPitcher("home").ID){
+                                var newPlayer = getBatter($(this).attr("player-id"), $(this).html(), getBatterByOrder(team, i*1).position);
+                                setBatterByOrder(team, i*1, newPlayer);
+                                break;
+                            }
+                        }
+
                     }
                 }
                 else {

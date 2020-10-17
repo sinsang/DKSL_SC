@@ -156,6 +156,9 @@
         <button id="gameSetAndSave">
           경기 종료 및 저장
         </button>
+        <div style="background-color: white;">
+          <strong>!!!이상하다 싶으면 무조건 새로고침 하십시오!!!</strong>
+        </div>
         <div class="base" id="firstBase">
           1루
         </div>
@@ -456,20 +459,15 @@
             getNowPitcher().stat.AB++;
             getNowPitcher().stat.SO++;
 
-            if (liveInfo.nowCount.Out >= 3){
-              sendText();
-              newInning();
-              nextBatter();
-              sendText();
-            }
-            else {
+
+            if (liveInfo.nowCount.Out < 3){
               liveInfo.waitForNextBatter = true;
               $("#runnerAfterHitRunnerSelect").show();
               setRunnerBtn();
               $("#pitching").hide();
               renewPlayerList();
-              renewBase();
             }
+            
 
           }
 
@@ -499,11 +497,13 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            liveInfo.waitForNextBatter = true;
-            $("#runnerAfterHitRunnerSelect").show();
-            setRunnerBtn();
-            $("#pitching").hide();
-            renewPlayerList();
+            if (liveInfo.nowCount.Out < 3){
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
 
           }
 
@@ -534,11 +534,13 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            liveInfo.waitForNextBatter = true;
-            $("#runnerAfterHitRunnerSelect").show();
-            setRunnerBtn();
-            $("#pitching").hide();
-            renewPlayerList();
+            if (liveInfo.nowCount.Out < 3){
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
 
           }
 
@@ -566,11 +568,13 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            liveInfo.waitForNextBatter = true;
-            $("#runnerAfterHitRunnerSelect").show();
-            setRunnerBtn();
-            $("#pitching").hide();
-            renewPlayerList();
+            if (liveInfo.nowCount.Out < 3){
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
 
           }
 
@@ -614,12 +618,13 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            liveInfo.waitForNextBatter = true;
-            $("#runnerAfterHitRunnerSelect").show();
-            setRunnerBtn();
-            $("#pitching").hide();
-            clearBase();
-            renewPlayerList();
+            if (liveInfo.nowCount.Out < 3){
+              liveInfo.waitForNextBatter = true;
+              $("#runnerAfterHitRunnerSelect").show();
+              setRunnerBtn();
+              $("#pitching").hide();
+              renewPlayerList();
+            }
 
           }
 
@@ -653,13 +658,8 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            if (liveInfo.nowCount.Out >= 3){
-              sendText();
-              newInning();
-              nextBatter();
-              sendText();
-            }
-            else {
+
+            if (liveInfo.nowCount.Out < 3){
               liveInfo.waitForNextBatter = true;
               $("#runnerAfterHitRunnerSelect").show();
               setRunnerBtn();
@@ -699,19 +699,15 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            if (liveInfo.nowCount.Out >= 3){
-              sendText();
-              newInning();
-              nextBatter();
-              sendText();
-            }
-            else {
+
+            if (liveInfo.nowCount.Out < 3){
               liveInfo.waitForNextBatter = true;
               $("#runnerAfterHitRunnerSelect").show();
               setRunnerBtn();
               $("#pitching").hide();
               renewPlayerList();
             }
+            
 
           }
 
@@ -743,24 +739,22 @@
             getNowPitcher().stat.R += RBI;
             getNowPitcher().stat.ER += RBI;
 
-            if (liveInfo.nowCount.Out >= 3){
-              sendText();
-              newInning();
-              nextBatter();
-              sendText();
-            }
-            else {
+
+            if (liveInfo.nowCount.Out < 3){
               liveInfo.waitForNextBatter = true;
               $("#runnerAfterHitRunnerSelect").show();
               setRunnerBtn();
               $("#pitching").hide();
               renewPlayerList();
             }
+            
 
           }
 
           // 도루
           SB = (base) => {
+
+            base = base*1 - 1;
 
             for (i in liveInfo.nowBase){
               if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
@@ -790,6 +784,8 @@
 
           // 폭투, 포일
           getBaseByError = (base, result, pos = -1) => {
+
+            base = base*1 - 1;
 
             for (i in liveInfo.nowBase){
               if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
@@ -824,6 +820,10 @@
 
           // 도루 실패
           CS = (base) => {
+
+            base = base*1 - 1;
+
+            console.log(base);
 
             for (i in liveInfo.nowBase){
               if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
@@ -974,13 +974,8 @@
               }
             }
 
-            if (liveInfo.nowCount.Out >= 3){
-              sendText();
-              newInning();
-              nextBatter();
-              sendText();
-            }
-            else {
+
+            if (liveInfo.nowCount.Out < 3){
               liveInfo.waitForNextBatter = true;
               $("#runnerAfterHitRunnerSelect").show();
               setRunnerBtn();
@@ -991,6 +986,7 @@
           }
 
           runnerAction = function(event) {
+
             var RBI = moveRunner();
             sendText();
 
@@ -1004,12 +1000,6 @@
             renewBase();
             renewPlayerList();
 
-            if (liveInfo.nowCount.Out >= 3){
-              sendText();
-              newInning();
-              nextBatter();
-              sendText();
-            }
           };
 
           // 베이스 상황판 갱신
@@ -1046,7 +1036,7 @@
                     left : mousePos.x,
                     top : mousePos.y
                   });
-                  $("#runnerOptionHeader").html((index + 1) + "루 주자 " + liveInfo.nowBase[index].name);
+                  $("#runnerOptionHeader").html((index) + "루 주자 " + liveInfo.nowBase[index - 1].name);
 
                   // 도루
                   $("#stolenBase").click(function(event) {
@@ -1186,7 +1176,6 @@
               var base = $(el).attr("base") * 1;
 
               $("#runnerAfterHitRunnerSelect").hide();
-
 
               $("#runnerAfterHitHeader").children("h1").html( base + "루 주자 타격상황이후 추가진루 상황");
               $("#runnerAfterHit").show();
@@ -1482,6 +1471,7 @@
             }
           });
 
+          // 보크
           $("#BK").click(function(event) {
             if(inputText("")){
               moveRunnerWhenBK();
@@ -1490,6 +1480,15 @@
                 sendText();
                 setCountBoard();
               });
+            }
+          });
+
+          // 경기 종료 및 저장
+          $("#gameSetAndSave").click(function(event){
+            if (confirm("경기를 종료하시겠습니까?")){
+              if (confirm("정말 경기를 종료하시겠습니까? 종료된 경기는 되돌릴 수 없습니다.")){
+                socket.emit("saveLive", gameId);
+              }
             }
           });
 

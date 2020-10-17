@@ -3,6 +3,7 @@ const app = express();
 const http = require("http").createServer(app);
 const fetch = require("node-fetch");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const port = 3002;
 
@@ -78,8 +79,20 @@ io.on("connect", (socket) => {
     socket.in("room" + index).emit("liveCast", liveRoom[index]);
   });
 
-  // 중계방 종료 요청 시
-  socket.on("deleteLive", (gameInfo) => {});
+  // 중계방 종료, 경기 저장 요청 시
+  socket.on("saveLive", (gameId) => {
+
+    fetch("http://127.0.0.1:3001/saveGame", {
+      headers : {
+        'Accept': 'application/json',
+        "Content-Type" : "application/json"
+      },
+      method: "POST",
+      body: JSON.stringify({game: liveRoom[gameId]})
+    })
+    .then(function(res) { console.log(res); })
+
+  });
 
   // 중계방 입장 시
   socket.on("joinLive", (gameId) => {
@@ -136,6 +149,7 @@ io.on("connect", (socket) => {
   socket.on("disconnect", () => {
     console.log("user disconnect");
   });
+
 });
 
 

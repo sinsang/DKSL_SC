@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>PASTGAMES</title>
+
+		 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<div id="games">
+		</div>
+	</body>
+	<script>
+		fetch("http://127.0.0.1:3001/getPastGames").then((r) => {
+			r.json().then((d) => {
+				for (i in d){
+					console.log(d[i].gameId);
+					console.log(d[i].info);
+					JSON.parse(d[i].info);
+				}
+			});
+		});
+	</script>
+
+</html>

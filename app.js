@@ -17,6 +17,10 @@ var liveRoom = [];
 app.use(cors());
 app.use('/script', express.static(__dirname + "/script"));
 
+app.get("/showGames", (req, res) => {
+  res.sendFile(__dirname + "/showGames.html");
+});
+
 app.get("/makeRoom", (req, res) => {
   res.sendFile(__dirname + "/makeRoom.html");
 });

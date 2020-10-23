@@ -754,7 +754,7 @@
           // 도루
           SB = (base) => {
 
-            base = base*1 - 1;
+            base = base*1;
 
             for (i in liveInfo.nowBase){
               if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
@@ -785,7 +785,7 @@
           // 폭투, 포일
           getBaseByError = (base, result, pos = -1) => {
 
-            base = base*1 - 1;
+            base = base*1;
 
             for (i in liveInfo.nowBase){
               if (!isEmptyObject(liveInfo.nowBase[i]) && afterSituBase[i] == 0){
@@ -821,7 +821,7 @@
           // 도루 실패
           CS = (base) => {
 
-            base = base*1 - 1;
+            base = base*1;
 
             console.log(base);
 
@@ -1013,7 +1013,7 @@
             $("#secondBase").html(liveInfo.nowBase[1].name);
             $("#thirdBase").html(liveInfo.nowBase[2].name);
 
-            $(".base").unbind("click");
+            //$(".base").unbind("click");
             $("#stolenBase").unbind("click");
             $("#stolenFailed").unbind("click");
             $("#wildPitch").unbind("click");
@@ -1025,71 +1025,79 @@
 
               if (!isEmptyObject(liveInfo.nowBase[i])){
 
-                $(".base:eq(" + i + ")").click(function(event) {
+                console.log(i);
 
-                  var mousePos = getMousePos(event);
-                  var index = $(this).index();
+                $(".base").each(function(index, el) {
+                  
+                  $(el).unbind("click");
+                  $(el).click(function(event) {
 
-                  $("#runnerOption").show();
-                  $("#subPlayersDivBack").show();
-                  $("#runnerOption").css({
-                    left : mousePos.x,
-                    top : mousePos.y
-                  });
-                  $("#runnerOptionHeader").html((index) + "루 주자 " + liveInfo.nowBase[index - 1].name);
+                    var mousePos = getMousePos(event);
 
-                  // 도루
-                  $("#stolenBase").click(function(event) {
-                    $("#stolenBase").unbind("click");
-                    $("#sendText").unbind("click", runnerAction);
-                    SB(index);
-                    $("#sendText").bind("click", runnerAction);
-                    $("#runnerOption").hide();
-                  });
+                    console.log(index);
 
-                  // 도루 실패
-                  $("#stolenFailed").click(function(event) {
-                    $("#stolenFailed").unbind("click");
-                    $("#sendText").unbind("click", runnerAction);
-                    CS(index);
-                    $("#sendText").bind("click", runnerAction);
-                    $("#runnerOption").hide();
-                  });
+                    $("#runnerOption").show();
+                    $("#subPlayersDivBack").show();
+                    $("#runnerOption").css({
+                      left : mousePos.x,
+                      top : mousePos.y
+                    });
+                    $("#runnerOptionHeader").html((index + 1) + "루 주자 " + liveInfo.nowBase[index].name);
 
-                  // 폭투
-                  $("#wildPitch").click(function(event) {
-                    $("#wildPitch").unbind("click");
-                    $("#sendText").unbind("click", runnerAction);
-                    getBaseByError(index, "폭투");
-                    $("#sendText").bind("click", runnerAction);
-                    $("#runnerOption").hide();
-                  });
+                    // 도루
+                    $("#stolenBase").click(function(event) {
+                      $("#stolenBase").unbind("click");
+                      $("#sendText").unbind("click", runnerAction);
+                      SB(index);
+                      $("#sendText").bind("click", runnerAction);
+                      $("#runnerOption").hide();
+                    });
 
-                  // 포일
-                  $("#catcherError").click(function(event) {
-                    $("#catcherError").unbind("click");
-                    $("#sendText").unbind("click", runnerAction);
-                    getBaseByError(index, "포일");
-                    $("#sendText").bind("click", runnerAction);
-                    $("#runnerOption").hide();
-                  });
+                    // 도루 실패
+                    $("#stolenFailed").click(function(event) {
+                      $("#stolenFailed").unbind("click");
+                      $("#sendText").unbind("click", runnerAction);
+                      CS(index);
+                      $("#sendText").bind("click", runnerAction);
+                      $("#runnerOption").hide();
+                    });
 
-                  // 실책
-                  $("#fielderError").click(function(event) {
-                    $("#fielderError").unbind("click");
-                    $("#sendText").unbind("click", runnerAction);
-                    getBaseByError(index, "실책");
-                    $("#sendText").bind("click", runnerAction);
-                    $("#runnerOption").hide();
-                  });
+                    // 폭투
+                    $("#wildPitch").click(function(event) {
+                      $("#wildPitch").unbind("click");
+                      $("#sendText").unbind("click", runnerAction);
+                      getBaseByError(index, "폭투");
+                      $("#sendText").bind("click", runnerAction);
+                      $("#runnerOption").hide();
+                    });
 
-                  // 견제사
-                  $("#pickoff").click(function(event) {
-                    $("#pickoff").unbind("click");
-                    $("#sendText").unbind("click", runnerAction);
-                    pickoff(index);
-                    $("#sendText").bind("click", runnerAction);
-                    $("#runnerOption").hide();
+                    // 포일
+                    $("#catcherError").click(function(event) {
+                      $("#catcherError").unbind("click");
+                      $("#sendText").unbind("click", runnerAction);
+                      getBaseByError(index, "포일");
+                      $("#sendText").bind("click", runnerAction);
+                      $("#runnerOption").hide();
+                    });
+
+                    // 실책
+                    $("#fielderError").click(function(event) {
+                      $("#fielderError").unbind("click");
+                      $("#sendText").unbind("click", runnerAction);
+                      getBaseByError(index, "실책");
+                      $("#sendText").bind("click", runnerAction);
+                      $("#runnerOption").hide();
+                    });
+
+                    // 견제사
+                    $("#pickoff").click(function(event) {
+                      $("#pickoff").unbind("click");
+                      $("#sendText").unbind("click", runnerAction);
+                      pickoff(index);
+                      $("#sendText").bind("click", runnerAction);
+                      $("#runnerOption").hide();
+                    });
+
                   });
 
                 });
